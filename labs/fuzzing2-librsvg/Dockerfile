@@ -1,6 +1,6 @@
 FROM debian:latest
 
-ARG LIBRSVG=librsvg-2.40.18
+ARG LIBRSVG=librsvg-2.37.0
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -37,7 +37,7 @@ RUN wget -m -np \
     find dev.w3.org -name "*.svg" -exec cp {} /work/corpus \;
 
 # Fetch and compile librsvg and install it under /app
-RUN curl -fLO https://download.gnome.org/sources/librsvg/2.40/${LIBRSVG}.tar.xz
+RUN curl -fLO https://download.gnome.org/sources/librsvg/2.37/${LIBRSVG}.tar.xz
 RUN xz -dc ${LIBRSVG}.tar.xz | tar xvf -
 RUN ln -s /work/${LIBRSVG} /work/librsvg
 
