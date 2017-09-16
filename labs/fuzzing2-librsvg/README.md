@@ -14,23 +14,34 @@ Librsvg is built and instrumented with [Clang 3.8 AddressSanitizer](http://relea
 ## Running
 
 ```sh
-docker run -ti librsvg ./fuzz.sh
+docker run -ti --rm --network none librsvg ./fuzz.sh
 ```
 
 ## Fuzzing
 
 ### With Randamsa
 
-Generate test material:
+Launch Docker image:
 
 ```sh
-radamsa -n 10000 -o tests/fuzz-%n.%s corpus/*.svg
+docker run -ti --rm --network none librsvg
 ```
 
-and run fuzzing:
+and start fuzzing:
 
 ```sh
 sh fuzz.sh
+```
+
+Observe found issues under `/work/crashes`:
+
+```
+ls -l /work/crashes/
+-rw------- 1 root root 10461 Sep 15 16:57 065cad360861e6095efbc2002d33f7e2811751c7
+-rw-r--r-- 1 root root  2957 Sep 15 16:57 065cad360861e6095efbc2002d33f7e2811751c7.txt
+-rw------- 1 root root  5886 Sep 15 16:57 0672295f0a8dfc22bfd21da85c72050ab621076e
+-rw-r--r-- 1 root root  2957 Sep 15 16:57 0672295f0a8dfc22bfd21da85c72050ab621076e.txt
+...
 ```
 
 ...
