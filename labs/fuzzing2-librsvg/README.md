@@ -1,27 +1,44 @@
 # Fuzzing librsvg
 
 This directory contains Dockerfile to help fuzzing librsvg. The built Docker
-image is using Debian 9.1. 
+image is using `debian:latest`, which at the time of our testing was Debian 9.1.
+
+## Instrumentation
 
 Librsvg is built and instrumented with [Clang 3.8 AddressSanitizer](http://releases.llvm.org/3.8.0/tools/clang/docs/AddressSanitizer.html).
 
-## Building
+Due to excessive memory leaks in the librsvg build and tooling we disabled
+`leaksanitizer` [`detect_leaks=0`] and to simplify scaffolding for the fuzzing we
+changed the ASAN exit code to be 127 [`exitcode=127`].
+
+## Fuzzer
+
+We chose [Radamsa](https://github.com/aoh/radamsa) to be the fuzzer of choice
+for this exercise and added it be installed in our [Dockerfile](Dockerfile).
+
+## Sample based fuzzing and the corpus
+
+Since Radamsa is a sample based fuzzer then fuzzing is as good as the initial
+samples are. As part of the build we fetch samples from <https://github.com/openscad/svg-tests>,
+<https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/> and
+<https://dev.w3.org/SVG/profiles/1.2T/test/svg/> as our fuzzing corpus.
+
+## Scaffolding
+
+To make the fuzzing with Radamsa as automatic as possible we have
+made a [`fuzz.sh` script](fuzz.sh) that generates batches of test cases
+and executes them while monitoring for failures.
+
+## Building the Docker image
 
 ```sh
 % docker build -t librsvg --rm .
 ```
 
-## Running
-
-```sh
-docker run -ti --rm --network none librsvg ./fuzz.sh
-```
-
 ## Fuzzing
 
-### With Randamsa
-
-Launch Docker image:
+Launch Docker image, in order to protect the innocent you can disable network
+while fuzzing:
 
 ```sh
 docker run -ti --rm --network none librsvg
@@ -35,7 +52,7 @@ sh fuzz.sh
 
 Observe found issues under `/work/crashes`:
 
-```
+```sh
 ls -l /work/crashes/
 -rw------- 1 root root 10461 Sep 15 16:57 065cad360861e6095efbc2002d33f7e2811751c7
 -rw-r--r-- 1 root root  2957 Sep 15 16:57 065cad360861e6095efbc2002d33f7e2811751c7.txt
@@ -44,12 +61,5 @@ ls -l /work/crashes/
 ...
 ```
 
-...
-
-### With AFL
-
-...
-
-### With libfuzzer
-
-???
+In addition to fuzzing Radamsa you could try out [AFL](http://lcamtuf.coredump.cx/afl/)
+or [libFuzzer](https://llvm.org/docs/LibFuzzer.html).
