@@ -1,0 +1,17 @@
+FROM debian:stretch
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+RUN echo 'deb http://debug.mirrors.debian.org/debian-debug/ stretch-debug main' >>/etc/apt/sources.list
+
+RUN apt -y update && \
+    apt -y install \
+        gdb \
+        libcairo2-dbgsym \
+        libpixman-1-0-dbg \
+        librsvg2-2-dbgsym \
+        librsvg2-bin \
+        librsvg2-bin-dbgsym
+
+RUN mkdir -p /work/crashes
+COPY crashes/* /work/crashes/
