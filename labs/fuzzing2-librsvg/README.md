@@ -61,5 +61,29 @@ ls -l /work/crashes/
 ...
 ```
 
+And remember to copy the crashes out from Docker image for further analysis:
+
+```
+docker cp <container id>:/work/crashes/ .  # <- mind the dot
+```
+
+# Reproduction environment
+
+To test if found issues can be reproduced we made another [Dockerfile](Dockerfile.repro) to have clean Debian environment with default packages and debug symbols.
+
+Build the repro image:
+
+```sh
+docker build -t librsvg-repro -f Dockerfile.repro .
+```
+
+To run the reproduction image Seccomp needs to be disabled so that GDB can disable ASLR when debugging (ref. [StackOverflow](https://stackoverflow.com/questions/35860527/warning-error-disabling-address-space-randomization-operation-not-permitted#comment62818827_35860527)).
+
+```sh
+docker run -ti --rm --security-opt seccomp=unconfined librsvg-repro
+```
+
+# Additional fuzzers to try out
+
 In addition to fuzzing Radamsa you could try out [AFL](http://lcamtuf.coredump.cx/afl/)
 or [libFuzzer](https://llvm.org/docs/LibFuzzer.html).
