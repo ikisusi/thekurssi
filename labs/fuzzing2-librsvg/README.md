@@ -63,13 +63,15 @@ ls -l /work/crashes/
 
 And remember to copy the crashes out from Docker image for further analysis:
 
-```
+```sh
 docker cp <container id>:/work/crashes/ .  # <- mind the dot
 ```
 
-# Reproduction environment
+## Reproduction environment
 
-To test if found issues can be reproduced we made another [Dockerfile](Dockerfile.repro) to have clean Debian environment with default packages and debug symbols.
+To test if found issues can be reproduced we made
+another [Dockerfile](Dockerfile.repro) to have clean Debian
+environment with default packages and debug symbols.
 
 Build the repro image:
 
@@ -77,13 +79,22 @@ Build the repro image:
 docker build -t librsvg-repro -f Dockerfile.repro .
 ```
 
-To run the reproduction image Seccomp needs to be disabled so that GDB can disable ASLR when debugging (ref. [StackOverflow](https://stackoverflow.com/questions/35860527/warning-error-disabling-address-space-randomization-operation-not-permitted#comment62818827_35860527)).
+To run the reproduction image Seccomp needs to be disabled so that GDB
+can disable ASLR when debugging (ref. [StackOverflow](https://stackoverflow.com/questions/35860527/warning-error-disabling-address-space-randomization-operation-not-permitted#comment62818827_35860527)).
 
 ```sh
 docker run -ti --rm --security-opt seccomp=unconfined librsvg-repro
 ```
 
-# Additional fuzzers to try out
+## Additional fuzzers to try out
 
 In addition to fuzzing Radamsa you could try out [AFL](http://lcamtuf.coredump.cx/afl/)
 or [libFuzzer](https://llvm.org/docs/LibFuzzer.html).
+
+## Results
+
+We did a bit of overnight, or actually 24h, fuzzing on a laptop and ended
+up reporting the following issues:
+
+* [Bug 787796 - Fuzz: Crash with circle with large numerical "r" attribute](https://bugzilla.gnome.org/show_bug.cgi?id=787796)
+* [Bug 787799 - Fuzz: Crash with large numerical value in stroke-width attribute](https://bugzilla.gnome.org/show_bug.cgi?id=787799)
