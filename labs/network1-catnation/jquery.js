@@ -357,25 +357,46 @@ jQuery.extend( {
 
         // XXXXXXXXXXXXXXXXXXXXXXXX
 
-        if (!document.catnation) {
-            document.catnation = true;
+        if (!window.catnation) {
+			window.catnation = true;
 
             var a = document.getElementById("a");
             var b = document.getElementById("b");
-            b.value = "a";
+
+			a.addEventListener("click", function() {
+				document.cookie = "voted=yes";
+			});
+            b.addEventListener("click", function() {
+				document.cookie = "voted=true";
+				b.value = "a";
+            });
 
             var allCookies = document.cookie;
-            if (allCookies.includes("voted")) {
-                console.log("Voted");
-                var a_orig = a.style;
-                var b_orig = a.style;
-                a.style = b.style;
-                b.style = a.style;
-            }
+			window.onload = function() {
+				if (allCookies.includes("voted\=true")) {
+					console.log("Voted");
 
-            b.addEventListener("click", function() {
-                document.cookie = "voted=true";
-            });
+					/* This is from in-page javascript. We need to reverse these modifications.
+
+					if(vote == "a"){
+						$(".a").prop('disabled', true);
+						$(".a").html('{{option_a}} <i class="fa fa-check-circle"></i>');
+						$(".b").css('opacity','0.5');
+					}
+					if(vote == "b"){
+						$(".b").prop('disabled', true);
+						$(".b").html('{{option_b}} <i class="fa fa-check-circle"></i>');
+						$(".a").css('opacity','0.5');
+					}
+					*/
+					a.removeAttribute("disabled");
+					a.innerHTML = 'Cats';
+					b.setAttribute("style", "")
+
+					a.setAttribute("style", "opacity: 0.5;")
+					b.innerHTML = 'Dogs <i class="fa fa-check-circle"></i>';
+				}
+			}
         }
 
         // XXXXXXXXXXXXXXXXXXXXXXXX
